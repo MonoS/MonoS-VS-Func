@@ -28,7 +28,7 @@ def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True):
 	
 	return fin
 
-def GCResizer(src, w, h, curve, Ykernel="spline64", UVkernel=None, Yinvks=False, UVinvks=None sigmoid=True, Yrfactor=2, UVrfactor=None Yinvkstaps=3, UVinvkstaps=None, Ytaps=4, UVtaps=None, css="420"):
+def GCResizer(src, w, h, curve, Ykernel="spline64", UVkernel=None, Yinvks=False, UVinvks=None, sigmoid=True, Yrfactor=2, UVrfactor=None, Yinvkstaps=3, UVinvkstaps=None, Ytaps=4, UVtaps=None, css="420"):
 	core = vs.get_core()
 	
 	if UVkernel is None:
@@ -63,7 +63,7 @@ def GCResizer(src, w, h, curve, Ykernel="spline64", UVkernel=None, Yinvks=False,
 		UVUpscale = True
 	
 	YTouch = True
-	if((wrt != 1.0) or (hrt != 1.0)):
+	if((wrt == 1.0) and (hrt == 1.0)):
 		YTouch = False
 	
 	Y = core.std.ShufflePlanes(src16, [0], vs.GRAY)
