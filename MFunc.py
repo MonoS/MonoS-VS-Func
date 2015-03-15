@@ -2,7 +2,7 @@ import vapoursynth as vs
 import Dither as dit
 import havsfunc as has
 
-def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True):
+def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True):
 	core = vs.get_core()
 	
 	src16 = src
@@ -19,12 +19,12 @@ def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True):
 	else:
 		blurred = src16
 	
-	super = core.mv.Super(blurred)
-	backward_vec2 = core.mv.Analyse(super, isb = True, delta = 2, overlap=4, truemotion=truemotion)
-	backward_vec1 = core.mv.Analyse(super, isb = True, delta = 1, overlap=4, truemotion=truemotion)
-	forward_vec1 = core.mv.Analyse(super, isb = False, delta = 1, overlap=4, truemotion=truemotion)
-	forward_vec2 = core.mv.Analyse(super, isb = False, delta = 2, overlap=4, truemotion=truemotion)
-	fin = core.mv.Degrain2(src16, super, backward_vec1,forward_vec1,backward_vec2,forward_vec2, denoise)
+	super = core.mv.Super(blurred, chroma=chroma)
+	backward_vec2 = core.mv.Analyse(super, isb = True, delta = 2, overlap=4, truemotion=truemotion, chroma=chroma)
+	backward_vec1 = core.mv.Analyse(super, isb = True, delta = 1, overlap=4, truemotion=truemotion, chroma=chroma)
+	forward_vec1 = core.mv.Analyse(super, isb = False, delta = 1, overlap=4, truemotion=truemotion, chroma=chroma)
+	forward_vec2 = core.mv.Analyse(super, isb = False, delta = 2, overlap=4, truemotion=truemotion, chroma=chroma)
+	fin = core.mv.Degrain2(src16, super, backward_vec1,forward_vec1,backward_vec2,forward_vec2, denoise, plane = 4 if chroma else 0)
 	
 	return fin
 
