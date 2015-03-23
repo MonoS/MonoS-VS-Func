@@ -20,12 +20,13 @@ def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True
 		blurred = src16
 	
 	rep = has.DitherLumaRebuild(blurred, s0=1, chroma=chroma)
+	superRep = core.mv.Super(rep, chroma=chroma)
 	
-	super = core.mv.Super(rep, chroma=chroma)
-	backward_vec2 = core.mv.Analyse(super, isb = True, delta = 2, overlap=4, truemotion=truemotion, chroma=chroma)
-	backward_vec1 = core.mv.Analyse(super, isb = True, delta = 1, overlap=4, truemotion=truemotion, chroma=chroma)
-	forward_vec1 = core.mv.Analyse(super, isb = False, delta = 1, overlap=4, truemotion=truemotion, chroma=chroma)
-	forward_vec2 = core.mv.Analyse(super, isb = False, delta = 2, overlap=4, truemotion=truemotion, chroma=chroma)
+	super = core.mv.Super(blurred, chroma=chroma)
+	backward_vec2 = core.mv.Analyse(superRep, isb = True, delta = 2, overlap=4, truemotion=truemotion, chroma=chroma)
+	backward_vec1 = core.mv.Analyse(superRep, isb = True, delta = 1, overlap=4, truemotion=truemotion, chroma=chroma)
+	forward_vec1 = core.mv.Analyse(superRep, isb = False, delta = 1, overlap=4, truemotion=truemotion, chroma=chroma)
+	forward_vec2 = core.mv.Analyse(superRep, isb = False, delta = 2, overlap=4, truemotion=truemotion, chroma=chroma)
 	fin = core.mv.Degrain2(src16, super, backward_vec1,forward_vec1,backward_vec2,forward_vec2, denoise, plane = 4 if chroma else 0)
 	
 	return fin
