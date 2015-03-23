@@ -19,7 +19,7 @@ def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True
 	else:
 		blurred = src16
 	
-	rep = has.DitherLumaRebuild(blurred, s0=1, chroma=ChromaMotion)
+	rep = has.DitherLumaRebuild(blurred, s0=1, chroma=chroma)
 	
 	super = core.mv.Super(rep, chroma=chroma)
 	backward_vec2 = core.mv.Analyse(super, isb = True, delta = 2, overlap=4, truemotion=truemotion, chroma=chroma)
