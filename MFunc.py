@@ -31,7 +31,7 @@ def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True
 	
 	return fin
 
-def GCResizer(src, w, h, curve="709", Ykernel="spline64", UVkernel=None, Yinvks=False, UVinvks=None, sigmoid=True, Yrfactor=2, UVrfactor=None, Yinvkstaps=3, UVinvkstaps=None, Ytaps=4, UVtaps=None, css="420"):
+def GCResizer(src, w, h, Ykernel="spline64", UVkernel=None, Yinvks=False, UVinvks=None, Yrfactor=2, UVrfactor=None, Yinvkstaps=3, UVinvkstaps=None, Ytaps=4, UVtaps=None, css="420", sigmoid=True, curve="709"):
 	core = vs.get_core()
 	
 	if UVkernel is None:
