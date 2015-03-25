@@ -5,14 +5,7 @@ import havsfunc as has
 def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True):
 	core = vs.get_core()
 	
-	src16 = src
-	if(lsb is True):
-		if(src.format.bits_per_sample == 8):
-			src16 = core.fmtc.bitdepth(src, bits=16)
-		else:
-			src16 = src
-	else:
-		src16 = src
+	src16 = Up16(src, lsb)
 	
 	if blur is not None:
 		blurred = core.generic.GBlur(src16, blur)
@@ -52,9 +45,7 @@ def GCResizer(src, w, h, Ykernel="spline64", UVkernel=None, Yinvks=False, UVinvk
 	wrt = w / src.width
 	hrt = h / src.height
 	
-	src16 = src
-	if(src.format.bits_per_sample < 16):
-		src16 = core.fmtc.bitdepth(src, bits=16)
+	src16 = Up16(src, True)
 	
 	YUpscale = False
 	UVUpscale = False
@@ -109,17 +100,18 @@ def GCResizer(src, w, h, Ykernel="spline64", UVkernel=None, Yinvks=False, UVinvk
 def MQTGMC(src, EZDenoise=None, lsb=True, TFF=True, half=False):
 	core = vs.get_core()
 	
-	src16 = src
-	if(lsb is True):
-		if(src.format.bits_per_sample == 8):
-			src16 = core.fmtc.bitdepth(src, bits=16)
-		else:
-			src16 = src
-	else:
-		src16 = src
+	src16 = Up16(src, lsb)
 	
 	FPSDivisor = 2 if half else 1
 	
 	result = has.QTGMC(src16, Preset="Very Slow", SourceMatch=3, MatchPreset2="Slow", Lossless=2, NoisePreset="Slow", TFF=TFF, EZDenoise=EZDenoise, FPSDivisor=FPSDivisor)
 	
 	return result
+
+def Up16(src, lsb=True)
+	
+	src16 = src
+	if(lsb is True) and (src.format.bits_per_sample < 16):
+			src16 = core.fmtc.bitdepth(src, bits=16)
+	
+	return src16
