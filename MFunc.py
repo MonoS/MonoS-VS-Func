@@ -1,6 +1,7 @@
 import vapoursynth as vs
 import Dither as dit
 import havsfunc as has
+import nnedi3_resample as res
 
 def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True):
 	core = vs.get_core()
@@ -24,78 +25,38 @@ def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True
 	
 	return fin
 
-def GCResizer(src, w, h, Ykernel="spline64", UVkernel=None, Yinvks=False, UVinvks=None, Yrfactor=2, UVrfactor=None, Yinvkstaps=3, UVinvkstaps=None, Ytaps=4, UVtaps=None, css="420", sigmoid=True, curve="709"):
+def GCResizer(src, w, h, Ykernel=None, UVkernel=None, Yinvks=False, UVinvks=None, Yinvkstaps=3, UVinvkstaps=None, Ytaps=4, UVtaps=None, css="420", sigmoid=True, curve="709", mat="709", scaleThr=1.0):
 	core = vs.get_core()
 	
+	src16 = Up16(src)
+	
+	csp = vs.YUV444P16 if css == "444" else None
+	
+	if Ykernel is None:
+		if Yinvks:
+			Ykernel = "bilinear"
+		else:
+			Ykernel = "spline64"
+	else:
+		Ykernel = "spline64"
+	
+	UVinvks = UVinvks if UVinvks is not None else Yinvks
+	
 	if UVkernel is None:
+		if UVinvks:
+			UVkernel = "bicubic"
+		else:
+			UVkernel = Ykernel
+	else:
 		UVkernel = Ykernel
 	
-	if UVinvks is None:
-		UVinvks = Yinvks
+	UVinvkstaps = UVinvkstaps if UVinvkstaps is not None else Yinvkstaps
 	
-	if UVinvkstaps is None:
-		UVinvkstaps = Yinvkstaps
+	UVtaps = UVtaps if UVtaps is not None else Ytaps
 	
-	if UVtaps is None:
-		UVtaps = Ytaps
+	resized = res.nnedi3_resample(src16, w, h, kernel=Ykernel, chromak_down=UVkernel, invks=Yinvks, chromak_down_invks=UVinvks, invkstaps=Yinvkstaps, chromak_down_invkstaps=UVinvkstaps, taps=Ytaps, chromak_down_taps=UVtaps, mats=mat, fulls=False, curves=curve, sigmoid=sigmoid, scale_thr=scaleThr, csp=csp)
 	
-	if UVrfactor is None:
-		UVrfactor = Yrfactor
-	
-	wrt = w / src.width
-	hrt = h / src.height
-	
-	src16 = Up16(src, True)
-	
-	YUpscale = False
-	UVUpscale = False
-	if((wrt > 1.0) or (hrt > 1.0)):
-		Yupscale = True
-		UVUpscale = True
-	
-	if((src16.format.id == vs.YUV420P16) and (css != "420") and ((wrt > 0.5) or (hrt > 0.5))):
-		UVUpscale = True
-	
-	YTouch = True
-	if((wrt == 1.0) and (hrt == 1.0)):
-		YTouch = False
-	
-	Y = core.std.ShufflePlanes(src16, [0], vs.GRAY)
-	UV = src16
-	
-	if YTouch:
-		YLin = dit.gamma_to_linear(Y, fulls=False, curve=curve, sigmoid=sigmoid)
-	else:
-		YLin = Y
-	
-	if YUpscale:
-		YLinUp = core.nnedi3.nnedi3_rpow2(YLin, Yrfactor)
-	else:
-		YLinUp = YLin
-	
-	if UVUpscale:
-		UVUp = core.nnedi3.nnedi3_rpow2(UV, UVrfactor, correct_shift=True)
-	else:
-		UVUp = UV
-	
-	if YTouch:
-		YLinDown = core.fmtc.resample(YLinUp, w, h, kernel=Ykernel, invks=Yinvks, invkstaps=Yinvkstaps, taps=Ytaps)
-	else:
-		YLinDown = YLinUp
-	
-	if((wrt != 0.5) and (hrt != 0.5)):
-		UVDown = core.fmtc.resample(UVUp, w, h, kernel=UVkernel, invks=UVinvks, invkstaps=UVinvkstaps, taps=UVtaps, planes=[1,3,3], css=css)
-	else:
-		UVDown = UVUp
-	
-	if YTouch:
-		YGammaDown = dit.linear_to_gamma(YLinDown, fulls=False, curve=curve, sigmoid=sigmoid)
-	else:
-		YGammaDown = YLinDown
-	
-	YUV = core.std.ShufflePlanes([YGammaDown, UVDown], [0,1,2], vs.YUV)
-	
-	return YUV
+	return resized
 
 def MQTGMC(src, EZDenoise=None, lsb=True, TFF=True, half=False):
 	core = vs.get_core()
