@@ -111,7 +111,7 @@ def MQTGMC(src, EZDenoise=None, lsb=True, TFF=True, half=False):
 	
 	return result
 
-def Up16(src, lsb=True)
+def Up16(src, lsb=True):
 	
 	src16 = src
 	if(lsb is True) and (src.format.bits_per_sample < 16):
