@@ -58,7 +58,7 @@ def GCResizer(src, w, h, Ykernel=None, UVkernel=None, Yinvks=False, UVinvks=None
 	
 	return resized
 
-def MQTGMC(src, EZDenoise=None, lsb=True, TFF=True, half=False):
+def MQTGMC(src, EZDenoise=None, lsb=True, TFF=True, half=False, fast=False):
 	core = vs.get_core()
 	
 	src16 = Up16(src, lsb)
