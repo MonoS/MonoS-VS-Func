@@ -76,6 +76,6 @@ def Up16(src, lsb=True):
 	
 	src16 = src
 	if(lsb is True) and (src.format.bits_per_sample < 16):
-			src16 = core.fmtc.bitdepth(src, bits=16)
+		src16 = core.fmtc.bitdepth(src, bits=16)
 	
 	return src16
