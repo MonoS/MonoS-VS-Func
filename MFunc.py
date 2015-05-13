@@ -3,10 +3,21 @@ import Dither as dit
 import havsfunc as has
 import nnedi3_resample as res
 
-def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True):
+def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True, fast=False, blksize=None):
 	core = vs.get_core()
 	
 	src16 = Up16(src, lsb)
+	
+	if fast:
+		if blksize is None:
+			blksize = 32
+		
+		overlap = blksize/4
+	else:
+		if blksize is None:
+			blksize = 8
+		
+		overlap = blksize/2
 	
 	if blur is not None:
 		blurred = core.generic.GBlur(src16, blur)
@@ -17,10 +28,10 @@ def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True
 	superRep = core.mv.Super(rep, chroma=chroma)
 	
 	super = core.mv.Super(blurred, chroma=chroma)
-	backward_vec2 = core.mv.Analyse(superRep, isb = True, delta = 2, overlap=4, truemotion=truemotion, chroma=chroma)
-	backward_vec1 = core.mv.Analyse(superRep, isb = True, delta = 1, overlap=4, truemotion=truemotion, chroma=chroma)
-	forward_vec1 = core.mv.Analyse(superRep, isb = False, delta = 1, overlap=4, truemotion=truemotion, chroma=chroma)
-	forward_vec2 = core.mv.Analyse(superRep, isb = False, delta = 2, overlap=4, truemotion=truemotion, chroma=chroma)
+	backward_vec2 = core.mv.Analyse(superRep, isb = True, delta = 2, blksize=blksize, overlap=overlap, truemotion=truemotion, chroma=chroma)
+	backward_vec1 = core.mv.Analyse(superRep, isb = True, delta = 1, blksize=blksize, overlap=overlap, truemotion=truemotion, chroma=chroma)
+	forward_vec1 = core.mv.Analyse(superRep, isb = False, delta = 1, blksize=blksize, overlap=overlap, truemotion=truemotion, chroma=chroma)
+	forward_vec2 = core.mv.Analyse(superRep, isb = False, delta = 2, blksize=blksize, overlap=overlap, truemotion=truemotion, chroma=chroma)
 	fin = core.mv.Degrain2(src16, super, backward_vec1,forward_vec1,backward_vec2,forward_vec2, denoise, plane = 4 if chroma else 0)
 	
 	return fin
