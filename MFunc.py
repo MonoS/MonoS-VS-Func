@@ -37,8 +37,6 @@ def GCResizer(src, w, h, Ykernel=None, UVkernel=None, Yinvks=False, UVinvks=None
 			Ykernel = "bilinear"
 		else:
 			Ykernel = "spline64"
-	else:
-		Ykernel = "spline64"
 	
 	UVinvks = UVinvks if UVinvks is not None else Yinvks
 	
@@ -47,8 +45,6 @@ def GCResizer(src, w, h, Ykernel=None, UVkernel=None, Yinvks=False, UVinvks=None
 			UVkernel = "bicubic"
 		else:
 			UVkernel = Ykernel
-	else:
-		UVkernel = Ykernel
 	
 	UVinvkstaps = UVinvkstaps if UVinvkstaps is not None else Yinvkstaps
 	
