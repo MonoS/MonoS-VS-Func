@@ -1,5 +1,4 @@
 import vapoursynth as vs
-import Dither as dit
 import havsfunc as has
 import nnedi3_resample as res
 
