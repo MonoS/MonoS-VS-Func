@@ -1,8 +1,8 @@
 import vapoursynth as vs
 import havsfunc as has
 import nnedi3_resample as res
+import os.path
 
-def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True, fast=False, blksize=None):
 def WriteVecs(vecs, prefix):
 	core = vs.get_core()
 	
@@ -29,7 +29,7 @@ def ReadVecs(index, prefix, h):
 	
 	return v
 	
-	
+def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True, fast=False, blksize=None):
 	core = vs.get_core()
 	
 	src16 = Up16(src, lsb)
