@@ -3,6 +3,33 @@ import havsfunc as has
 import nnedi3_resample as res
 
 def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True, fast=False, blksize=None):
+def WriteVecs(vecs, prefix):
+	core = vs.get_core()
+	
+	w = vecs[0].get_frame(0).width
+	
+	v = core.std.StackVertical([core.std.CropAbs(vec, width=w, height=1) for vec in vecs])
+	
+	log = open(prefix + ".len", "w")
+	log.write(repr(w))
+	log.close()
+	
+	return v
+
+def ReadVecs(index, prefix, h):
+	core = vs.get_core()
+	
+	f = open(prefix + ".len", "r")
+	w = int(f.read())
+	f.close()
+	
+	vecs = core.raws.Source(prefix + ".vec", w, h, src_fmt="Y8")
+	
+	v = core.std.CropAbs(vecs, y=index, height=1, width=w)
+	
+	return v
+	
+	
 	core = vs.get_core()
 	
 	src16 = Up16(src, lsb)
