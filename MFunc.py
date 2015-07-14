@@ -54,12 +54,29 @@ def ReadVecs(index, prefix, h):
 	rep = has.DitherLumaRebuild(blurred, s0=1, chroma=chroma)
 	superRep = core.mv.Super(rep, chroma=chroma)
 	
-	super = core.mv.Super(blurred, chroma=chroma)
-	backward_vec2 = core.mv.Analyse(superRep, isb = True, delta = 2, blksize=blksize, overlap=overlap, truemotion=truemotion, chroma=chroma)
-	backward_vec1 = core.mv.Analyse(superRep, isb = True, delta = 1, blksize=blksize, overlap=overlap, truemotion=truemotion, chroma=chroma)
-	forward_vec1 = core.mv.Analyse(superRep, isb = False, delta = 1, blksize=blksize, overlap=overlap, truemotion=truemotion, chroma=chroma)
-	forward_vec2 = core.mv.Analyse(superRep, isb = False, delta = 2, blksize=blksize, overlap=overlap, truemotion=truemotion, chroma=chroma)
-	fin = core.mv.Degrain2(src16, super, backward_vec1,forward_vec1,backward_vec2,forward_vec2, denoise, plane = 4 if chroma else 0)
+	super = core.mv.Super(src16, chroma=chroma)
+	
+	if prefix is not None:
+		exist = os.path.exists(prefix + ".vec") and os.path.exists(prefix + ".len")
+		create = not exist
+	else:
+		exist = False
+		create = False
+	
+	if not exist:
+		bvec2 = core.mv.Analyse(superRep, isb = True, delta = 2, blksize=blksize, overlap=overlap, truemotion=truemotion, chroma=chroma)
+		bvec1 = core.mv.Analyse(superRep, isb = True, delta = 1, blksize=blksize, overlap=overlap, truemotion=truemotion, chroma=chroma)
+		fvec1 = core.mv.Analyse(superRep, isb = False, delta = 1, blksize=blksize, overlap=overlap, truemotion=truemotion, chroma=chroma)
+		fvec2 = core.mv.Analyse(superRep, isb = False, delta = 2, blksize=blksize, overlap=overlap, truemotion=truemotion, chroma=chroma)
+		if create:
+			return WriteVecs([bvec1, bvec2, fvec1, fvec2], prefix)
+	else:
+		bvec1 = ReadVecs(0, prefix, 4)
+		bvec2 = ReadVecs(1, prefix, 4)
+		fvec1 = ReadVecs(2, prefix, 4)
+		fvec2 = ReadVecs(3, prefix, 4)
+		
+	fin = core.mv.Degrain2(src16, super, bvec1,fvec1,bvec2,fvec2, denoise, plane = 4 if chroma else 0)
 	
 	return fin
 
