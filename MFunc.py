@@ -28,8 +28,8 @@ def ReadVecs(index, prefix, h):
 	v = core.std.CropAbs(vecs, y=index, height=1, width=w)
 	
 	return v
-	
-def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True, fast=False, blksize=None):
+
+def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True, fast=False, blksize=None, prefix=None, recalculate=None, thSAD=None):
 	core = vs.get_core()
 	
 	src16 = Up16(src, lsb)
@@ -45,14 +45,11 @@ def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True
 		
 		overlap = int(blksize/2)
 	
-	if blur is not None:
-		blurred = core.generic.GBlur(src, blur, planes = [0,1,2] if chroma else [0])
-		blurred = Up16(blurred, lsb) if lsb else blurred
-	else:
-		blurred = src16
+	if recalculate is None:
+		recalculate = blksize
 	
-	rep = has.DitherLumaRebuild(blurred, s0=1, chroma=chroma)
-	superRep = core.mv.Super(rep, chroma=chroma)
+	if thSAD is None:
+		thSAD = int(denoise * 1.25)
 	
 	super = core.mv.Super(src16, chroma=chroma)
 	
@@ -62,6 +59,16 @@ def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True
 	else:
 		exist = False
 		create = False
+	
+	if not exist or (blksize > recalculate):
+		if blur is not None:
+			blurred = core.generic.GBlur(src, blur)
+			blurred = Up16(blurred, lsb)
+		else:
+			blurred = src16
+		
+		rep = has.DitherLumaRebuild(blurred, s0=1, chroma=chroma)
+		superRep = core.mv.Super(rep, chroma=chroma)
 	
 	if not exist:
 		bvec2 = core.mv.Analyse(superRep, isb = True, delta = 2, blksize=blksize, overlap=overlap, truemotion=truemotion, chroma=chroma)
@@ -75,7 +82,19 @@ def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True
 		bvec2 = ReadVecs(1, prefix, 4)
 		fvec1 = ReadVecs(2, prefix, 4)
 		fvec2 = ReadVecs(3, prefix, 4)
-		
+	
+	while blksize > recalculate:
+		blksize = int(blksize / 2)
+		if fast:
+			overlap = int(overlap / 4)
+		else:
+			overlap = int(overlap / 2)
+			
+		bvec1 = core.mv.Recalculate(superRep, bvec1, thSAD, blksize=blksize, chroma=chroma, truemotion=truemotion, overlap=overlap)
+		bvec2 = core.mv.Recalculate(superRep, bvec2, thSAD, blksize=blksize, chroma=chroma, truemotion=truemotion, overlap=overlap)
+		fvec1 = core.mv.Recalculate(superRep, fvec1, thSAD, blksize=blksize, chroma=chroma, truemotion=truemotion, overlap=overlap)
+		fvec2 = core.mv.Recalculate(superRep, fvec2, thSAD, blksize=blksize, chroma=chroma, truemotion=truemotion, overlap=overlap)
+	
 	fin = core.mv.Degrain2(src16, super, bvec1,fvec1,bvec2,fvec2, denoise, plane = 4 if chroma else 0)
 	
 	return fin
