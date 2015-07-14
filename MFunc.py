@@ -20,7 +20,8 @@ def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True
 		overlap = int(blksize/2)
 	
 	if blur is not None:
-		blurred = core.generic.GBlur(src16, blur)
+		blurred = core.generic.GBlur(src, blur, planes = [0,1,2] if chroma else [0])
+		blurred = Up16(blurred, lsb) if lsb else blurred
 	else:
 		blurred = src16
 	
