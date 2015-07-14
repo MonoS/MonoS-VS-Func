@@ -12,12 +12,12 @@ def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True
 		if blksize is None:
 			blksize = 32
 		
-		overlap = blksize/4
+		overlap = int(blksize/4)
 	else:
 		if blksize is None:
 			blksize = 8
 		
-		overlap = blksize/2
+		overlap = int(blksize/2)
 	
 	if blur is not None:
 		blurred = core.generic.GBlur(src16, blur)
