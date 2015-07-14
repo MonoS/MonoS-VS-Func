@@ -79,6 +79,11 @@ def MQTGMC(src, EZDenoise=None, lsb=None, TFF=True, half=False, fast=False):
 	
 	FPSDivisor = 2 if half else 1
 	
+	# Controllare MatchEnhance e/o Sharpness in quanto con SourceMatch il risultato sembra essere meno sharposo
+	
+	# has.QTGMC(src16, Preset="Very Slow", SourceMatch=3, MatchPreset="Slow", MatchPreset2="Ultra Fast",  Lossless=2, NoisePreset="Slow", TFF=TFF, EZDenoise=EZDenoise, FPSDivisor=FPSDivisor)
+	# has.QTGMC(src16, Preset="Medium", SourceMatch=3, MatchPreset="Fast", MatchPreset2="Ultra Fast",  Lossless=2, NoisePreset="Medium", TFF=TFF, EZDenoise=EZDenoise, FPSDivisor=FPSDivisor)
+	
 	if fast:
 		result = has.QTGMC(src16, Preset="Medium", SourceMatch=3, MatchPreset="Fast", Lossless=2, NoisePreset="Medium", TFF=TFF, EZDenoise=EZDenoise, FPSDivisor=FPSDivisor)
 	else:
