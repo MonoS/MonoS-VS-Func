@@ -82,6 +82,12 @@ def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True
 		bvec2 = ReadVecs(1, prefix, 4)
 		fvec1 = ReadVecs(2, prefix, 4)
 		fvec2 = ReadVecs(3, prefix, 4)
+		
+	if blksize > recalculate and exist:
+		bvec1 = core.std.Splice([core.std.BlankClip(bvec1, width=1, length=1), bvec1], mismatch=True).std.Trim(1)
+		bvec2 = core.std.Splice([core.std.BlankClip(bvec2, width=1, length=1), bvec2], mismatch=True).std.Trim(1)
+		fvec1 = core.std.Splice([core.std.BlankClip(fvec1, width=1, length=1), fvec1], mismatch=True).std.Trim(1)
+		fvec2 = core.std.Splice([core.std.BlankClip(fvec2, width=1, length=1), fvec2], mismatch=True).std.Trim(1)
 	
 	while blksize > recalculate:
 		blksize = int(blksize / 2)
