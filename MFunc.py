@@ -177,8 +177,11 @@ def ToRGB(src, mats="709"):
 	
 	return ris
 
-def imwriSave(src, path, format="PNG24", first=0):
+def imwriSave(src, path, format="PNG24", first=0, dmode=7, lsb=False):
 	core = vs.get_core()
+	
+	if(lsb is False) and (src.format.bits_per_sample > 8):
+		srcDown = core.fmtc.bitdepth(src, bits=8, dmode=dmode)
 	
 	core.std.LoadPlugin("C:/Program Files (x86)/VapourSynth/plugins64/imwri/imwri.dll")
 	
