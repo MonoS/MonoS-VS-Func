@@ -176,3 +176,11 @@ def ToRGB(src, mats="709"):
 	ris = res.nnedi3_resample(src16, src16.width, src16.height, mats=mats, curves="709", fulls=False, csp=vs.RGB48)
 	
 	return ris
+
+def imwriSave(src, path, format="PNG24", first=0):
+	core = vs.get_core()
+	
+	core.std.LoadPlugin("C:/Program Files (x86)/VapourSynth/plugins64/imwri/imwri.dll")
+	
+	return core.imwri.Write(srcDown, format, path, firstnum=first)
+	
