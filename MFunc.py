@@ -167,3 +167,12 @@ def Up16(src, lsb=True):
 		src16 = core.fmtc.bitdepth(src, bits=16)
 	
 	return src16
+
+def ToRGB(src, mats="709"):
+	core = vs.get_core()
+	
+	src16 = Up16(src)
+	
+	ris = res.nnedi3_resample(src16, src16.width, src16.height, mats=mats, curves="709", fulls=False, csp=vs.RGB48)
+	
+	return ris
