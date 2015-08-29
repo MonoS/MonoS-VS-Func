@@ -186,4 +186,18 @@ def imwriSave(src, path, format="PNG24", first=0, dmode=7, lsb=False):
 	core.std.LoadPlugin("C:/Program Files (x86)/VapourSynth/plugins64/imwri/imwri.dll")
 	
 	return core.imwri.Write(srcDown, format, path, firstnum=first)
+
+def Source(file, lsb=False):
+	core = vs.get_core()
 	
+	if file.startswith("file:///"):
+		file = file[8::]
+	
+	if file.endswith(".d2v"):
+		src = core.d2v.Source(file, nocrop=True)
+	else:
+		src = core.lsmas.LWLibavSource(file)
+	
+	src16 = Up16(src, lsb)
+	
+	return src16
