@@ -51,6 +51,10 @@ def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True
 	if thSAD is None:
 		thSAD = int(denoise * 1.25)
 	
+	pad = blksize + overlap
+	
+	src16 = core.fmtc.resample(src16, src16.width+pad, src16.height+pad, sw=src16.width+pad, sh=src16.height+pad, kernel="point")
+	
 	super = core.mv.Super(src16, chroma=chroma)
 	
 	if prefix is not None:
@@ -102,6 +106,8 @@ def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True
 		fvec2 = core.mv.Recalculate(superRep, fvec2, thSAD, blksize=blksize, chroma=chroma, truemotion=truemotion, overlap=overlap)
 	
 	fin = core.mv.Degrain2(src16, super, bvec1,fvec1,bvec2,fvec2, denoise, plane = 4 if chroma else 0)
+	
+	fin = core.std.CropRel(fin, 0, pad, 0, pad)
 	
 	return fin
 
