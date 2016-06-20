@@ -32,8 +32,6 @@ def ReadVecs(index, prefix, h):
 def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True, fast=False, blksize=None, prefix=None, recalculate=None, thSAD=None):
 	core = vs.get_core()
 	
-	src16 = Up16(src, lsb)
-	
 	if fast:
 		if blksize is None:
 			blksize = 32
@@ -53,7 +51,9 @@ def Denoise2(src, denoise=400, blur=None, lsb=True, truemotion=True, chroma=True
 	
 	pad = blksize + overlap
 	
-	src16 = core.fmtc.resample(src16, src16.width+pad, src16.height+pad, sw=src16.width+pad, sh=src16.height+pad, kernel="point")
+	src = core.fmtc.resample(src, src.width+pad, src.height+pad, sw=src.width+pad, sh=src.height+pad, kernel="point")
+	
+	src16 = Up16(src, lsb)
 	
 	super = core.mv.Super(src16, chroma=chroma)
 	
